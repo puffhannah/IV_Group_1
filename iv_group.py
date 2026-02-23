@@ -12,6 +12,8 @@
 # ).interactive()
 # #chart.show()
 # chart.save("first_vis.html")
+
+
 import pandas as pd
 import altair as alt
 from altair.datasets import data
@@ -25,15 +27,19 @@ dropdown_condition= alt.binding_select(
 select_condition= alt.selection_point(
     fields=['condition'], bind=dropdown_condition
 )
-chart =alt.Chart(df).mark_point(size=10, opacity=0.8).encode(
-    x= alt.X('blood_pressure'), #scale=alt.Scale(zero= False)),
-    y= alt.Y('glucose_levels'), #scale= alt.Scale(zero= False)),
-    color= alt.condition(select_condition,'condition',alt.value('lightgray')),
+chart =alt.Chart(df).mark_point(size=60, opacity=1).encode(
+    x= alt.X('blood_pressure', scale=alt.Scale(domain= [80,180])),
+    y= alt.Y('glucose_levels', scale= alt.Scale(domain=[70,180])),
+    color= alt.condition(select_condition,'condition',alt.value('black')),
     shape= alt.Shape('gender', scale= alt.Scale(domain=['female','male'], range=['square','circle'])),
     tooltip=['condition', 'blood_pressure', 'glucose_levels', 'gender'],
-    opacity=alt.condition(select_condition, alt.value(0.7), alt.value(0.05))
+    #opacity=alt.condition(select_condition, alt.value(0.7), alt.value(0.05)
+    
+).properties(width=500,height=500
 ).add_params(select_condition
 ).transform_calculate(jitter = 'random()').interactive()
 chart.show()
 chart.save("first_vis_drop.html")
 print(df['gender'].unique())
+
+#alt.Chart(df).mar
