@@ -27,16 +27,23 @@ dropdown_condition= alt.binding_select(
 select_condition= alt.selection_point(
     fields=['condition'], bind=dropdown_condition
 )
-chart =alt.Chart(df).mark_point(size=60, opacity=1).encode(
-    x= alt.X('blood_pressure', scale=alt.Scale(domain= [80,180])),
-    y= alt.Y('glucose_levels', scale= alt.Scale(domain=[70,180])),
+gender_radio= alt.binding_radio(
+    options=['female','male'],
+    name='Gender:'
+)
+select_gender= alt.selection_point(
+    fields=['gender'], bind=gender_radio
+)
+chart =alt.Chart(df).mark_point(size=60, opacity=1, filled=True).encode(
+    x= alt.X('blood_pressure', scale=alt.Scale(domain= [70,200])),
+    y= alt.Y('glucose_levels', scale= alt.Scale(domain=[70,200])),
     color= alt.condition(select_condition,'condition',alt.value('black')),
     shape= alt.Shape('gender', scale= alt.Scale(domain=['female','male'], range=['square','circle'])),
     tooltip=['condition', 'blood_pressure', 'glucose_levels', 'gender'],
-    #opacity=alt.condition(select_condition, alt.value(0.7), alt.value(0.05)
-    
+).transform_filter(select_condition
+).transform_filter(select_gender
 ).properties(width=500,height=500
-).add_params(select_condition
+).add_params(select_condition, select_gender
 ).transform_calculate(jitter = 'random()').interactive()
 chart.show()
 chart.save("first_vis_drop.html")
