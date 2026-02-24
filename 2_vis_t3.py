@@ -12,34 +12,29 @@ dropdown_condition= alt.binding_select(
  name='Conditions' 
 
 ) 
-
 select_condition= alt.selection_point( 
 fields=['condition'], bind=dropdown_condition 
-
 ) 
 
 gender_radio= alt.binding_radio( 
     options=['female','male'], 
+    labels=['female','male'],
     name='Gender:' 
-
 ) 
 
 select_gender= alt.selection_point(
-    fields=['gender'], bind=gender_radio 
+    fields=['gender'], bind=gender_radio, 
 
 ) 
-
 age_slider= alt.binding_range( 
     min= 0, 
     max= 80, 
     step=1, 
     name= "age scale", 
-
 ) 
 select_age= alt.param( 
     value=60, 
     bind=age_slider 
-
 ) 
 
 chart2 =alt.Chart(df).mark_point(size=60, opacity=1, filled=True).encode( 
@@ -50,7 +45,7 @@ chart2 =alt.Chart(df).mark_point(size=60, opacity=1, filled=True).encode(
     tooltip=['condition', 'blood_pressure', 'glucose_levels', 'gender','age'], 
 
 ).transform_filter(select_condition 
-).transform_filter(select_gender 
+).transform_filter(select_gender
 ).transform_filter( alt.datum.age >=select_age 
 ).properties(width=500,height=500 
 ).facet( 
