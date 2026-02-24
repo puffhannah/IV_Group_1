@@ -41,14 +41,14 @@ chart =alt.Chart(df).mark_point(size=80, opacity=1, filled=True).transform_calcu
     y= alt.Y('glucose_levels', scale= alt.Scale(domain=[70,200])),
     color= alt.condition(select_condition,'condition:N',alt.value('black')),
     shape= alt.Shape('gender', scale= alt.Scale(domain=['female','male'], range=['square','circle'])),
-    size= alt.Size('smoking_status:N',scale=alt.Scale(domain=['Non-Smoker','Smoker'], range=[60,150])),
+    size= alt.Size('smoking_status:N',scale=alt.Scale(domain=['Non-Smoker','Smoker'], range=[60,180])),
     tooltip=['condition', 'blood_pressure', 'glucose_levels', 'gender','smoking_status'],
 ).transform_filter(select_condition
 ).transform_filter(select_gender
-).properties(width=400,height=400
+).properties(width=450,height=450
 ).facet(
     facet= alt.Facet('age_group:O',
-    sort=['Under 30','30-59','50-79','80+'],
+    sort=['30-59',' Under 30','80+','50-79'],
     title='Age Group'),
     columns=2,
     title=alt.TitleParams(
