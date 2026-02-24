@@ -153,5 +153,5 @@ chart = (
     )
 )
 
-chart.save("heatmap_output.html")
-print("saved to heatmap_output.html")
+chart.save("heatmap.html")
+print("saved to heatmap.html")
