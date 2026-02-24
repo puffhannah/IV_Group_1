@@ -4,7 +4,10 @@ import altair as alt
 
 alt.data_transformers.disable_max_rows()
 
-df = pd.read_csv("medical_clean_final.csv")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+csv_path = os.path.join(BASE_DIR, "medical_clean_final.csv")
+
+df = pd.read_csv(csv_path)
 
 df["age"] = pd.to_numeric(df["age"], errors="coerce")
 df = df.dropna(subset=["age", "gender", "smoking_status"]).copy()
