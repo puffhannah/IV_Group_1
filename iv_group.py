@@ -49,4 +49,5 @@ chart.show()
 chart.save("first_vis_drop.html")
 print(df['gender'].unique())
 
-#alt.Chart(df).mar
+
+

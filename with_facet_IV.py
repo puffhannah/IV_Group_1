@@ -65,4 +65,3 @@ print(df['gender'].unique())
 
 
 
-#alt.Chart(df).mar
