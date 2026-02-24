@@ -34,6 +34,15 @@ gender_radio= alt.binding_radio(
 select_gender= alt.selection_point(
     fields=['gender'], bind=gender_radio
 )
+# age_slider= alt.binding_range(
+#     min= 0,
+#     max= 80,
+#     step=1,
+#     name= "age scale"
+# )
+# select_age= alt.param(
+#     value=60,
+#     bind=age_slider
 chart =alt.Chart(df).mark_point(size=80, opacity=1, filled=True).transform_calculate(
     age_group=alt.expr.if_(alt.datum.age< 30,'Under 30',alt.expr.if_(alt.datum.age<60,'30-59',alt.expr.if_(alt.datum.age<80,'60-79','80+')))
 ).encode(
@@ -45,10 +54,11 @@ chart =alt.Chart(df).mark_point(size=80, opacity=1, filled=True).transform_calcu
     tooltip=['condition', 'blood_pressure', 'glucose_levels', 'gender','smoking_status'],
 ).transform_filter(select_condition
 ).transform_filter(select_gender
+#.transform_filter( alt.datum.age >=select_age
 ).properties(width=450,height=450
 ).facet(
     facet= alt.Facet('age_group:O',
-    sort=['30-59',' Under 30','80+','50-79'],
+    sort=['30-59','Under 30','80+','50-79'],
     title='Age Group'),
     columns=2,
     title=alt.TitleParams(
@@ -57,7 +67,7 @@ chart =alt.Chart(df).mark_point(size=80, opacity=1, filled=True).transform_calcu
         subtitleColor='gray',
         subtitleFontSize=12,
         anchor='end')
-).add_params(select_condition, select_gender
+).add_params(select_condition, select_gender  #select_age
 ).transform_calculate(jitter = 'random()').interactive()
 chart.show()
 chart.save("facet_vis.html")
