@@ -106,7 +106,7 @@ heatmap = base.mark_rect().encode(
     color=alt.Color(
         "count:Q",
         title="Count",
-        scale=alt.Scale(domainMin=0)
+        scale=alt.Scale(domainMin=0,range=["#cfe2f3", "#08306b"])
     ),
     tooltip=[
         alt.Tooltip("age_group:N", title="Age Group"),
