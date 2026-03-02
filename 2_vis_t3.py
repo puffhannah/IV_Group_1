@@ -83,13 +83,13 @@ select_condition = alt.selection_point(
     fields=['condition'], bind=dropdown_condition, value=[{'condition': 'Diabetic'}]
 )
 
-gender_radio = alt.binding_radio(
-    options=['female', 'male'],
-    labels=['female', 'male'],
+gender_checkbox = alt.binding_checkbox(
+    options=['None','female', 'male'],
+    labels=['All','female', 'male'],
     name='Gender:'
 )
 select_gender = alt.selection_point(
-    fields=['gender'], bind=gender_radio
+    fields=['gender'], bind=gender_checkbox
 )
 
 age_slider = alt.binding_range(min=0, max=80, step=1, name="age scale")
