@@ -83,13 +83,13 @@ select_condition = alt.selection_point(
     fields=['condition'], bind=dropdown_condition, value=[{'condition': 'Diabetic'}]
 )
 
-gender_checkbox = alt.binding_checkbox(
-    options=['None','female', 'male'],
-    labels=['All','female', 'male'],
+gender_radio = alt.binding_radio(
+    options=[None,'female', 'male'], 
+    labels=[ 'Both','female', 'male'],
     name='Gender:'
 )
 select_gender = alt.selection_point(
-    fields=['gender'], bind=gender_checkbox
+    fields=['gender'], bind=gender_radio
 )
 
 age_slider = alt.binding_range(min=0, max=80, step=1, name="age scale")
@@ -119,12 +119,12 @@ bp_threshold = alt.Chart(df).mark_rule(
     threshold='140'   
 )
 
-scatter = alt.Chart(df).mark_point(size=60, filled=True).encode(
+scatter = alt.Chart(df).mark_point(size=60,opacity=1.0, filled=True).encode(
     x=alt.X('blood_pressure:Q', scale=alt.Scale(domain=[70, 200])),
     y=alt.Y('glucose_levels:Q', scale=alt.Scale(domain=[70, 200])),
-    color=alt.condition(linked_selection, alt.Color('condition:N'), alt.value('lightgray')),
-    opacity=alt.condition(linked_selection, alt.value(1.0), alt.value(0.15)),
-    size=alt.condition(linked_selection, alt.value(100), alt.value(40)),
+    color=alt.condition(select_condition, alt.Color('condition:N'), alt.value('lightgray')),
+    #opacity=alt.condition(linked_selection, alt.value(1.0), alt.value(0.15)),
+    #size=alt.condition(linked_selection, alt.value(100), alt.value(40)),
     shape=alt.Shape('gender:N', scale=alt.Scale(domain=['female', 'male'], range=['square', 'circle'])),
     tooltip=['condition', 'blood_pressure', 'glucose_levels', 'gender', 'age'],
 ).transform_filter(select_condition
@@ -145,7 +145,7 @@ chart2 = alt.layer(
         subtitle='* Elderly is defined as age 60+ | Red line = Hypertension (140)',
         subtitleColor='gray',
         subtitleFontSize=12,
-        anchor='end')
+        anchor='middle')
 ).add_params(select_gender, select_age, linked_selection, select_condition
 ).interactive()
 
