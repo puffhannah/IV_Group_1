@@ -20,7 +20,7 @@ measure_dropdown = alt.binding_select(
 measure = alt.param(name="measure", value="blood_pressure", bind=measure_dropdown)
 
 
-# Base: mean per age per gender 
+# Base: mean per age per gender     
 base = (
     alt.Chart(df)
     .add_params(measure)
