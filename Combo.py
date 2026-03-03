@@ -8,19 +8,27 @@ df = pd.read_csv("medical_clean_final.csv")
 df["age"] = pd.to_numeric(df["age"], errors="coerce")
 df["blood_pressure"] = pd.to_numeric(df["blood_pressure"], errors="coerce")
 df["glucose_levels"] = pd.to_numeric(df["glucose_levels"], errors="coerce")
+
+# standardise gender text
 df["gender"] = df["gender"].astype(str).str.strip().str.lower()
+# drop rows with missing values
 df = df.dropna(subset=["age", "gender", "blood_pressure", "glucose_levels"]).copy()
 
-#  Measure dropdown
+# Create a dropdown to switch between blood pressure and glucose levels
 measure_dropdown = alt.binding_select(
     options=["blood_pressure", "glucose_levels"],
     labels=["Blood Pressure", "Glucose Levels"],
     name="Measure: "
 )
+# Use a parameter to store the selected measure, default is blood pressure
 measure = alt.param(name="measure", value="blood_pressure", bind=measure_dropdown)
 
 
+<<<<<<< HEAD
 # Base: mean per age per gender     
+=======
+# Round age to integer, then calculate mean value by age and gender
+>>>>>>> 4d8164ce5e84f799a4e9952e99f9df5ff19595af
 base = (
     alt.Chart(df)
     .add_params(measure)
@@ -42,20 +50,22 @@ smooth_base = base.transform_loess(
     as_=["age_int", "smooth_value"]
 )
 
+# Main smoothed trend line
 smooth = smooth_base.mark_line(strokeWidth=4).encode(
     x="age_int:Q",
     y="smooth_value:Q"
 )
 
+# Add faint mean points in the background to show the line is based on real data
 faint_points = base.mark_circle(size=30, opacity=0.18).encode(
     x="age_int:Q",
     y="mean_value:Q"
 )
 
-
+# Enable pan and zoom interaction
 panzoom = alt.selection_interval(bind="scales")
 
-
+# Hover interaction: show vertical rule and value when mouse moves
 hover = alt.selection_point(
     fields=["age_int"],
     nearest=True,
@@ -64,14 +74,14 @@ hover = alt.selection_point(
     clear="mouseout"
 )
 
-
+# Invisible points used to capture mouse movement for stable hover behaviour
 selectors = (
     smooth_base.mark_point(opacity=0)
     .encode(x="age_int:Q", y="smooth_value:Q")
     .add_params(hover)
 )
 
-
+# vertical rule at the hovered age
 rule = (
     alt.Chart(df)
     .transform_calculate(age_int="toNumber(round(datum.age))")
@@ -80,7 +90,7 @@ rule = (
     .transform_filter(hover)
 )
 
-
+# highlight circle on the smooth line
 highlight = (
     smooth_base.mark_circle(size=120)
     .encode(
@@ -95,7 +105,7 @@ highlight = (
     .transform_filter(hover)
 )
 
-
+# text label showing value on the smooth line
 labels = (
     smooth_base.mark_text(dx=8, dy=-10, fontSize=13)
     .encode(
