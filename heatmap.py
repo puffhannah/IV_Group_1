@@ -112,7 +112,7 @@ heatmap = base.mark_rect().encode(
         alt.Tooltip("age_group:N", title="Age Group"),
         alt.Tooltip("gender:N", title="Gender"),
         alt.Tooltip("count:Q", title="Count"),
-        alt.Tooltip("percent:Q", title="Percent within Age Group", format=".1%")
+        alt.Tooltip("percent:Q", title="Percent within Age Group", format="i.1%")
     ]
 )
 
