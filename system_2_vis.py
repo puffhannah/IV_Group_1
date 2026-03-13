@@ -14,9 +14,11 @@ df["blood_pressure"] = pd.to_numeric(df["blood_pressure"], errors="coerce")
 df["glucose_levels"] = pd.to_numeric(df["glucose_levels"], errors="coerce")
 df["gender"]         = df["gender"].astype(str).str.strip().str.lower()
 
-# ── CHART 1: Heatmap 
+# CHART 1: Heatmap 
 df_heat = df.dropna(subset=["age", "gender", "smoking_status"]).copy()
 
+# NEW: Age groups (4 bins)
+# Under 30, 30-59, 60-79, 80+
 def make_age_group(a):
     if a < 30:   return "under30"
     elif a < 60: return "30-59"
@@ -26,6 +28,7 @@ def make_age_group(a):
 df_heat["age_group"] = df_heat["age"].apply(make_age_group)
 AGE_ORDER = ["under30", "30-59", "60-79", "80+"]
 
+#Smoking status filter (All / Smoking / Non-Smoking)
 s = (df_heat["smoking_status"].astype(str).str.strip().str.lower()
      .str.replace("-", "", regex=False).str.replace(" ", "", regex=False))
 
@@ -38,12 +41,14 @@ def map_smoking(x):
     return "other"
 
 df_heat["smoking_filter"] = s.apply(map_smoking)
-
+#param
 smoking_param = alt.param(
     name="Smoking", value="all",
     bind=alt.binding_select(options=["all","smoker","non-smoker"], name="Smoking Status: ")
 )
 
+ #Base pipeline:
+#    filter -> aggregate(count) -> percent within age_group
 base_heat = (
     alt.Chart(df_heat)
     .transform_filter("Smoking == 'all' || datum.smoking_filter == Smoking")
@@ -88,8 +93,9 @@ chart1 = (
     .properties(title="Participant Distribution by Age Group x Gender", width=400, height=400, ))
 
 
-# ── CHART 2: Combo Line
+#  CHART 2: Combo Line
 df_combo = df.dropna(subset=["age","gender","blood_pressure","glucose_levels"]).copy()
+# standardise gender text
 
 measure = alt.param(name="measure", value="blood_pressure",
     bind=alt.binding_select(options=["blood_pressure","glucose_levels"],
@@ -107,28 +113,37 @@ base_combo = (
     .transform_aggregate(mean_value="mean(selected_value)", groupby=["age_int","gender","age_group"])
 )
 
-
+# LOESS smooth -> smooth_value
 smooth_base = base_combo.transform_loess(
     "age_int","mean_value", groupby=["gender"], bandwidth=0.35, as_=["age_int","smooth_value"])
 
+# Main smoothed trend line
 smooth = smooth_base.mark_line(strokeWidth=4).encode(x="age_int:Q", y="smooth_value:Q")
-faint_points = base_combo.mark_circle(size=30, opacity=0.18).encode(x="age:Q", y="mean_value:Q").add_params(brush)
 
+# Add faint mean points in the background to show the line is based on real data
+faint_points = base_combo.mark_circle(size=30, opacity=0.18).encode(x="age:Q", y="mean_value:Q").add_params(brush)
+# Enable pan and zoom interaction
 panzoom = alt.selection_interval(bind="scales")
+
+# Hover interaction: show vertical rule and value when mouse moves
 hover   = alt.selection_point(fields=["age_int"], nearest=True,
                                on="mousemove", empty=False, clear="mouseout")
 
+# Invisible points used to capture mouse movement for stable hover behaviour
 selectors = (smooth_base.mark_point(opacity=0)
              .encode(x="age_int:Q", y="smooth_value:Q").add_params(hover))
+
+ # vertical rule at the hovered age            
 rule =smooth_base.mark_rule(color="red", strokeWidth=2).encode(x="age_int:Q").transform_filter(hover)
-# (alt.Chart(df_combo).transform_calculate(age_int="toNumber(round(datum.age))")
-#
+
+## highlight circle on the smooth line
 highlight = (smooth_base.mark_circle(size=120)
              .encode(x="age_int:Q", y="smooth_value:Q",
                      tooltip=[alt.Tooltip("age_int:Q",title="Age"),
                                alt.Tooltip("gender:N",title="Gender"),
                                alt.Tooltip("smooth_value:Q",title="Value",format=".2f")])
              .transform_filter(hover))
+# text label showing value on the smooth line
 labels = (smooth_base.mark_text(dx=8,dy=-10,fontSize=13)
           .encode(x="age_int:Q",y="smooth_value:Q",
                   text=alt.Text("smooth_value:Q",format=".2f")).transform_filter(hover))
@@ -147,28 +162,29 @@ chart2 = (
                 title={"text":"Glucose Levels and Blood Pressure Trends",
                        "subtitle":"Lines are smoothed means","anchor":"middle"},
                        
-   # ).transform_filter(interval)
+   
 ))
 
-# ── CHART 3: Scatter Facet 
+#  CHART 3: Scatter Facet 
 df_scatter = df.dropna(subset=["age","gender","blood_pressure","glucose_levels",
                                 "condition","smoking_status"]).copy()
 
+#made a dropdown bar so users can look at each condition separately.
 select_condition = alt.selection_point(
     fields=["condition"],
     bind=alt.binding_select(options=[None,"Diabetic","Cancer","Pneumonia"],
                              labels=["All","Diabetic","Cancer","Pneumonia"], name="Conditions"),
     value=[{"condition":"Diabetic"}]
-)
+) ##made radio buttons to switch data to focus on female, male and both
 select_gender = alt.selection_point(
     fields=["gender"],
     bind=alt.binding_radio(options=[None,"female","male"],
                             labels=["Both","female","male"], name="Gender:")
-)
+)##age slider tool to have a range from 0-80 year old. it will be filtered to both facets.
 select_age = alt.param(value=60,
     bind=alt.binding_range(min=0, max=80, step=1, name="age scale"))
 linked_selection = alt.selection_point(fields=["condition"], on="click", clear="dblclick")
-
+#making a vertical line to show blood pressure threshold
 bp_threshold = (
     alt.Chart(df_scatter).mark_rule(color="red", strokeDash=[6,3], size=2)
     .encode(x=alt.X("threshold:Q", scale=alt.Scale(domain=[70,200])),
@@ -186,12 +202,13 @@ scatter = (
                         scale=alt.Scale(domain=["female","male"], range=["square","circle"])),
         tooltip=["condition","blood_pressure","glucose_levels","gender","age"],
     )
-    .transform_filter(select_condition)
-    .transform_filter(select_gender)
+    .transform_filter(select_condition)#tying my dropdown of conditions to plot
+    .transform_filter(select_gender)#tying my radio buttons to scatter plot
     #.transform_filter(brush)
-    .transform_filter(alt.datum.age >= select_age)
+    .transform_filter(alt.datum.age >= select_age)#for my age slider
 )
-
+#.facet( #allowed me to show smoking and non-smoking sideby side.
+#
 chart3 = (
     alt.layer(scatter, bp_threshold).properties(width=400, height=350)
     .facet(facet=alt.Facet("smoking_status:N", sort=["Non-Smoker","Smoker"], title="Smoking Status"),
