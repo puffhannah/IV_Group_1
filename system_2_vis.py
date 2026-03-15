@@ -245,7 +245,7 @@ html = f"""<!DOCTYPE html>
 T1- Does glucose levels increase with age?
 T2- Are there distinct patterns in these measures among individuals diagnosed with diabetes?
 T3- Find elderly smokers with elevated blood pressure that should have medical interventions?
-T4- In different age groups, how many male and female will smoke?
+T4- In different age groups, how many males and females are smokers?
 T5 - Are there certain age-gender combinations underrepresented from this study?
   </p>
   <div id="top"></div>
